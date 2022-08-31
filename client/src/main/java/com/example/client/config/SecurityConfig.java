@@ -8,6 +8,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * @author Joe Grandja
+ * @since 0.0.1
+ */
 @EnableWebSecurity
 public class SecurityConfig {
 

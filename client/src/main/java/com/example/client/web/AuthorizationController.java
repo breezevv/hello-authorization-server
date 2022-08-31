@@ -3,7 +3,6 @@ package com.example.client.web;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.stereotype.Controller;
@@ -34,10 +33,9 @@ public class AuthorizationController {
 
     @GetMapping(value = "/authorize", params = "grant_type=authorization_code")
     public String authorizationCodeGrant(Model model,
-                                         @RegisteredOAuth2AuthorizedClient("messaging-client-oidc")
+                                         @RegisteredOAuth2AuthorizedClient("messaging-client-authorization-code")
                                          OAuth2AuthorizedClient authorizedClient) {
-        OAuth2AccessToken accessToken = authorizedClient.getAccessToken();
-        String tokenValue = accessToken.getTokenValue();
+
         String[] messages = this.webClient
                 .get()
                 .uri(this.messagesBaseUri)
