@@ -13,7 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.oauth2AuthorizedClient;
 
 /**
@@ -49,7 +48,7 @@ public class AuthorizationController {
     }
 
     // '/authorized' is the registered 'redirect_uri' for authorization_code
-    @GetMapping(value = "/authorized", params = OAuth2ParameterNames.ERROR)
+    @GetMapping(value = "/authorized", params = OAuth2ParameterNames.CODE)
     public String authorizationFailed(Model model, HttpServletRequest request) {
         String errorCode = request.getParameter(OAuth2ParameterNames.ERROR);
         if (StringUtils.hasText(errorCode)) {
@@ -60,21 +59,6 @@ public class AuthorizationController {
                             request.getParameter(OAuth2ParameterNames.ERROR_URI))
             );
         }
-
-        return "index";
-    }
-
-    @GetMapping(value = "/authorize", params = "grant_type=client_credentials")
-    public String clientCredentialsGrant(Model model) {
-
-        String[] messages = this.webClient
-                .get()
-                .uri(this.messagesBaseUri)
-                .attributes(clientRegistrationId("messaging-client-client-credentials"))
-                .retrieve()
-                .bodyToMono(String[].class)
-                .block();
-        model.addAttribute("messages", messages);
 
         return "index";
     }

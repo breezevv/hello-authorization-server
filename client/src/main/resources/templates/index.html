@@ -31,9 +31,6 @@
             <li class="list-group-item">
                 <a href="/authorize?grant_type=authorization_code" th:href="@{/authorize?grant_type=authorization_code}"><span style="font-size:medium">Authorization Code</span>&nbsp;&nbsp;<small class="text-muted">(Login to Spring Authorization Server using: user1/password)</small></a>
             </li>
-            <li class="list-group-item">
-                <a href="/authorize?grant_type=client_credentials" th:href="@{/authorize?grant_type=client_credentials}"><span style="font-size:medium">Client Credentials</span></a>
-            </li>
         </ul>
         <div th:if="${messages}" class="panel-footer">
             <h4>Messages:</h4>
