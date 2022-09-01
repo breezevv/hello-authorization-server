@@ -40,6 +40,7 @@ public class AuthorizationServerConfig {
         OAuth2AuthorizationServerConfigurer<HttpSecurity> authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer<>();
         authorizationServerConfigurer
+
                 .authorizationEndpoint(authorizationEndpoint ->
                         authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI));
 
@@ -74,7 +75,21 @@ public class AuthorizationServerConfig {
                 .scope("message.write")
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
-        return new InMemoryRegisteredClientRepository(registeredClient);
+
+        RegisteredClient registeredClient1 = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("test")
+                .clientSecret("{noop}123456")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+//
+                .redirectUri("http://127.0.0.1:8082/callback")
+                .scope(OidcScopes.OPENID)
+                .scope("message.read")
+                .scope("message.write")
+                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                .build();
+        return new InMemoryRegisteredClientRepository(registeredClient, registeredClient1);
     }
     // @formatter:on
 
@@ -87,7 +102,8 @@ public class AuthorizationServerConfig {
 
     @Bean
     public ProviderSettings providerSettings() {
-        return ProviderSettings.builder().issuer("http://localhost:9000").build();
+        return ProviderSettings.builder().issuer("http://localhost:9000").
+        authorizationEndpoint("/my/authorize").build();
     }
 
     @Bean
