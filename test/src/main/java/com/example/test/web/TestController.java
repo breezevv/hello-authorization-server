@@ -1,5 +1,7 @@
 package com.example.test.web;
 
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +25,16 @@ public class TestController {
     @GetMapping("/callback")
     public void callback(String code) {
         System.out.println(code);
+//        String url = String.format("http://127.0.0.1:9000/oauth2/token?code=%s&grant_type=authorization_code", code);
+//        System.out.println(url);
+        HttpResponse response = HttpUtil.createPost("http://127.0.0.1:9000/oauth2/token")
+                .form("code", code)
+                .form("client_id", clientId)
+                .form("client_secret", "123456")
+                .form("grant_type", "authorization_code")
+                .form("redirect_uri", "http://127.0.0.1:8082/callback")
+                .execute();
+//        String res = HttpUtil.post(url, "");
+        System.out.println(response);
     }
 }
