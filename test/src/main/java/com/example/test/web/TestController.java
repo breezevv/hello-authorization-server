@@ -2,6 +2,8 @@ package com.example.test.web;
 
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,16 +27,20 @@ public class TestController {
     @GetMapping("/callback")
     public void callback(String code) {
         System.out.println(code);
-//        String url = String.format("http://127.0.0.1:9000/oauth2/token?code=%s&grant_type=authorization_code", code);
-//        System.out.println(url);
-        HttpResponse response = HttpUtil.createPost("http://127.0.0.1:9000/oauth2/token")
-                .form("code", code)
-                .form("client_id", clientId)
-                .form("client_secret", "123456")
-                .form("grant_type", "authorization_code")
-                .form("redirect_uri", "http://127.0.0.1:8082/callback")
-                .execute();
-//        String res = HttpUtil.post(url, "");
-        System.out.println(response);
+        HttpResponse accessTokenResponse =
+                HttpUtil.createPost("http://127.0.0.1:9000/oauth2/token")
+                        .form("code", code)
+                        .form("client_id", clientId)
+                        .form("client_secret", "123456")
+                        .form("grant_type", "authorization_code")
+                        .form("redirect_uri", "http://127.0.0.1:8082/callback")
+                        .execute();
+        JSONObject jsonObject = JSONUtil.parseObj(accessTokenResponse.body());
+        String accessToken = (String) jsonObject.get("access_token");
+        HttpResponse httpResponse =
+                HttpUtil.createGet("http://127.0.0.1:8090/messages")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .execute();
+        System.out.println(httpResponse.body());
     }
 }
