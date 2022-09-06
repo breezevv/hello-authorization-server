@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>创建OAuth2应用</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.min.js"></script></head>
+<body>
+    <div id="app">
+        <label> 客户端 id
+            <input v-model="client.client_id" placeholder="客户端 id" />
+        </label>
+        <br/>
+        <label> 客户端回调地址
+            <input v-model="client.redirect_uri" placeholder="客户端回调地址" />
+        </label>
+        <button @click="createClient">提交</button>
+    </div>
+
+    <script>
+
+        const app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    client: {
+                        "client_id": "",
+                        "redirect_uri": ""
+                    }
+                }
+            },
+            methods: {
+                createClient() {
+                    this.getToken()
+                    // axios({
+                    //     method: 'post',
+                    //     url: '/connect/register',
+                    //     data: {
+                    //         'client_id': this.client.client_id,
+                    //         'redirect_uris': [this.client.redirect_uri]
+                    //     }
+                    // })
+                },
+
+                getToken() {
+                    axios({
+                        method: 'post',
+                        url: '/my/authorize',
+                        params: {
+                            'grant_type': 'authorization_code',
+                            'scope': 'client.create',
+                            'client_assertion_type': 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+                            'client_assertion': this.client.client_id,
+                            'client_id': this.client.client_id,
+                        }
+                    }).then(response => {
+                        console.log(response)
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+</html>
