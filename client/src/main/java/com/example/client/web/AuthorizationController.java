@@ -32,7 +32,7 @@ public class AuthorizationController {
 
     @GetMapping(value = "/authorize", params = "grant_type=authorization_code")
     public String authorizationCodeGrant(Model model,
-                                         @RegisteredOAuth2AuthorizedClient("messaging-client-authorization-code")
+                                         @RegisteredOAuth2AuthorizedClient("test")
                                          OAuth2AuthorizedClient authorizedClient) {
 
         String[] messages = this.webClient

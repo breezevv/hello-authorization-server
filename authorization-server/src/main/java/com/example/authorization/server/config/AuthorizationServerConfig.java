@@ -100,9 +100,9 @@ public class AuthorizationServerConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//
                 .redirectUri("http://127.0.0.1:8082/callback")
                 .redirectUri("http://127.0.0.1:8082/callback2")
+                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/test")
                 .scope(OidcScopes.OPENID)
                 .scope("message.read")
                 .scope("message.write")

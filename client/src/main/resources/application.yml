@@ -16,17 +16,18 @@ spring:
     oauth2:
       client:
         registration:
-          messaging-client-authorization-code:
+          test:
             provider: spring
-            client-id: messaging-client
-            client-secret: secret
+            client-id: test
+            client-secret: 123456
+            client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
             scope: openid,message.read,message.write
-            client-name: messaging-client-authorization-code
         provider:
           spring:
             issuer-uri: http://localhost:9000
+            authorization-uri: http://localhost:9000/my/authorize
 
 messages:
   base-uri: http://127.0.0.1:8090/messages
