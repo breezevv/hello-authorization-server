@@ -15,6 +15,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -64,42 +65,10 @@ public class AuthorizationServerConfig {
                 .formLogin(loginConfigurer -> {
                     loginConfigurer.loginPage("/login");
                 })
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .apply(authorizationServerConfigurer);
         return http.build();
     }
-
-    // @formatter:off
-//    @Bean
-//    public RegisteredClientRepository registeredClientRepository() {
-//        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-//                .clientId("messaging-client")
-//                .clientSecret("{noop}secret")
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-authorization-code")
-//                .scope(OidcScopes.OPENID)
-//                .scope("message.read")
-//                .scope("message.write")
-//                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-//                .build();
-//
-//        RegisteredClient registeredClient1 = RegisteredClient.withId(UUID.randomUUID().toString())
-//                .clientId("test")
-//                .clientSecret("{noop}123456")
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-////
-//                .redirectUri("http://127.0.0.1:8082/callback")
-//                .scope(OidcScopes.OPENID)
-//                .scope("message.read")
-//                .scope("message.write")
-//                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-//                .build();
-//        return new InMemoryRegisteredClientRepository(registeredClient, registeredClient1);
-//    }
-    // @formatter:on
 
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
@@ -133,12 +102,14 @@ public class AuthorizationServerConfig {
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 //
                 .redirectUri("http://127.0.0.1:8082/callback")
+                .redirectUri("http://127.0.0.1:8082/callback2")
                 .scope(OidcScopes.OPENID)
                 .scope("message.read")
                 .scope("message.write")
+                .scope("client.create")
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
-        RegisteredClient exist = jdbcRegisteredClientRepository.findByClientId("test");
+        RegisteredClient exist = jdbcRegisteredClientRepository.findByClientId(registeredClient1.getClientId());
         if (exist == null) {
             jdbcRegisteredClientRepository.save(registeredClient1);
         }
