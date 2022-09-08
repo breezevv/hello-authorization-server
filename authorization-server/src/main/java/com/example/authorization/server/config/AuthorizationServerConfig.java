@@ -1,6 +1,9 @@
 package com.example.authorization.server.config;
 
 import com.example.authorization.server.jose.Jwks;
+import com.example.authorization.server.repository.AuthorizationConsentRepository;
+import com.example.authorization.server.repository.AuthorizationRepository;
+import com.example.authorization.server.repository.ClientRepository;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -9,8 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
@@ -20,11 +21,8 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationConsentService;
-import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
@@ -32,6 +30,7 @@ import org.springframework.security.oauth2.server.authorization.config.ProviderS
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -86,15 +85,17 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    public OAuth2AuthorizationConsentService authorizationConsentService() {
+    public OAuth2AuthorizationConsentService authorizationConsentService(
+            AuthorizationConsentRepository authorizationConsentRepository,
+            RegisteredClientRepository registeredClientRepository) {
         // Will be used by the ConsentController
-        return new InMemoryOAuth2AuthorizationConsentService();
+        return new JpaOAuth2AuthorizationConsentService(authorizationConsentRepository, registeredClientRepository);
     }
 
     @Bean
-    RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-        JdbcRegisteredClientRepository jdbcRegisteredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        RegisteredClient registeredClient1 = RegisteredClient.withId(UUID.randomUUID().toString())
+    RegisteredClientRepository registeredClientRepository(ClientRepository clientRepository) {
+        JpaRegisteredClientRepository registeredClientRepository = new JpaRegisteredClientRepository(clientRepository);
+        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("test")
                 .clientSecret("{noop}123456")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
@@ -106,19 +107,21 @@ public class AuthorizationServerConfig {
                 .scope(OidcScopes.OPENID)
                 .scope("message.read")
                 .scope("message.write")
+                .clientIdIssuedAt(Instant.now())
                 .scope("client.create")
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
-        RegisteredClient exist = jdbcRegisteredClientRepository.findByClientId(registeredClient1.getClientId());
-        if (exist == null) {
-            jdbcRegisteredClientRepository.save(registeredClient1);
+        if (registeredClientRepository.findByClientId(registeredClient.getClientId()) == null) {
+            registeredClientRepository.save(registeredClient);
         }
-        return jdbcRegisteredClientRepository;
+        return registeredClientRepository;
     }
 
     @Bean
-    OAuth2AuthorizationService authorizationService(JdbcOperations jdbcOperations, RegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository);
+    OAuth2AuthorizationService authorizationService(
+            AuthorizationRepository authorizationRepository,
+            RegisteredClientRepository registeredClientRepository) {
+        return new JpaOAuth2AuthorizationService(authorizationRepository, registeredClientRepository);
     }
 
 //    @Bean
