@@ -21,7 +21,7 @@ public class TestController {
         String location = String.format("http://localhost:9000/my/authorize?response_type=code&" +
                         "client_id=%s&scope=openid message.read message.write&" +
                         "redirect_uri=%s"
-                , clientId, "http://127.0.0.1:8082/callback");
+                , clientId, "http://127.0.0.1:8081/callback");
         response.sendRedirect(location);
     }
 
@@ -34,7 +34,7 @@ public class TestController {
                         .form("client_id", clientId)
                         .form("client_secret", "123456")
                         .form("grant_type", "authorization_code")
-                        .form("redirect_uri", "http://127.0.0.1:8082/callback")
+                        .form("redirect_uri", "http://127.0.0.1:8081/callback")
                         .execute();
         JSONObject jsonObject = JSONUtil.parseObj(accessTokenResponse.body());
         String accessToken = (String) jsonObject.get("access_token");
@@ -50,7 +50,7 @@ public class TestController {
         String location = String.format("http://localhost:9000/my/authorize?response_type=code&" +
                         "client_id=%s&scope=client.create&" +
                         "redirect_uri=%s"
-                , clientId, "http://127.0.0.1:8082/callback2");
+                , clientId, "http://127.0.0.1:8081/callback2");
         response.sendRedirect(location);
     }
 
@@ -61,7 +61,7 @@ public class TestController {
                 .form("grant_type", "authorization_code")
                 .form("client_id", clientId)
                 .form("client_secret", "123456")
-                .form("redirect_uri", "http://127.0.0.1:8082/callback2")
+                .form("redirect_uri", "http://127.0.0.1:8081/callback2")
                 .execute();
         JSONObject jsonObject = JSONUtil.parseObj(accessTokenResponse.body());
         String accessToken = (String) jsonObject.get("access_token");
@@ -72,7 +72,7 @@ public class TestController {
         params.putOnce("scope", "message.read message.write");
         params.putOnce("grant_types", "authorization_code");
         params.putOnce("token_endpoint_auth_method", "client_secret_post");
-        params.putOnce("redirect_uris", new String[] {"http:127.0.0.1:8082/callback3"});
+        params.putOnce("redirect_uris", new String[] {"http:127.0.0.1:8081/callback3"});
         HttpResponse response = HttpUtil.createPost("http://127.0.0.1:9000/connect/register")
                 .bearerAuth(accessToken)
                 .contentType(ContentType.JSON.getValue())
